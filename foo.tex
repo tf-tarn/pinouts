@@ -1,0 +1,186 @@
+%%% Local Variables:
+%%% coding: utf-8
+%%% mode: latex
+%%% TeX-engine: xetex
+%%% TeX-master: t
+%%% End:
+
+\documentclass[6pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usepackage{fp}
+\usepackage{forloop}
+% \usepackage{fontspec}
+\usepackage{pgfkeys}
+% \usepackage{amsmath}
+% \usepackage{mathtools}
+\usepackage {accents}
+\usepackage{mathspec}
+\usepackage {bm}
+
+\setmainfont[
+Path = /home/tarn/repo/code/py/pinouts/,
+UprightFont = FuturaPTBold,
+Extension = .otf,
+SizeFeatures={Size=7}
+]{FuturaPTBold}
+
+\setmathsfont(Digits,Latin)[
+Path = /home/tarn/repo/code/py/pinouts/,
+UprightFont = FuturaPTBold,
+ItalicFont = FuturaPTBold,
+BoldFont = FuturaPTBold,
+BoldItalicFont = FuturaPTBold,
+Extension = .otf,
+Uppercase=Regular,
+Lowercase=Regular,
+Arabic=Regular
+]{FuturaPTBold}
+
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MYSTERY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pgfkeys{
+ /pinnames/.is family, /pinnames,
+ .unknown/.style = {\pgfkeyscurrentname/.initial = #1},
+}
+\newcommand\setpinnames[1]{\pgfkeys{/pinnames, #1}}
+\newcommand\getpinnames[1]{\pgfkeysvalueof{/pinnames/#1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% /MYSTERY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\ic}[4]{
+
+% ??
+% \wlog {#4}
+% \newcounter{ct}
+% \foreach \x in {#4} {
+%   \stepcounter{ct}
+%   \setpinnames{\thect=\x}
+% \wlog{\thect}
+% }
+
+\setpinnames{#4}
+
+\begin{tikzpicture}[line cap=round]
+
+\FPeval\aspect{1.5}
+\FPeval\npins{#1}
+\FPeval\halfpins{#1 / 2}
+\FPeval\width{20.0}
+% \FPeval\height{\npins * \aspect * \width / 16}
+\FPeval\pinpitch{11.0 * \width / 66.0}
+\FPeval\height{(\halfpins + 1) * \pinpitch}
+
+\FPeval\xpos{0}
+\FPeval\ypos{0}
+
+\FPeval\boxx{\xpos + \pinpitch}
+\FPeval\boxy{\ypos}
+
+% \FPeval\dbga{\ypos}
+% \FPeval\dbgb{\boxy}
+% \draw[line width=0.5mm] (0 mm, \ypos mm) -- (40 mm, \ypos mm);
+% \draw[line width=0.5mm] (0 mm, \boxy mm) -- (40 mm, \boxy mm);
+
+\FPeval\xa{\boxx}
+\FPeval\ya{\boxy}
+\FPeval\xb{\boxx + \width}
+\FPeval\yb{\boxy + \height}
+
+% Left, right, and bottom sides of the box.
+\draw[line width=0.5mm] (\xa mm,\ya mm) -- (\xb mm, \ya mm);
+\draw[line width=0.5mm] (\xa mm,\ya mm) -- (\xa mm, \yb mm);
+\draw[line width=0.5mm] (\xb mm,\ya mm) -- (\xb mm, \yb mm);
+
+% Now make the dimple.
+\FPeval\xcp{\xa + \width / 2}
+\FPeval\xlp{\xcp - \pinpitch / 2}
+\FPeval\xrp{\xcp + \pinpitch / 2}
+\draw[line width=0.5mm] (\xa mm,\yb mm) -- (\xlp mm, \yb mm);
+\draw[line width=0.5mm] (\xrp mm,\yb mm) -- (\xb mm, \yb mm);
+\FPeval\dia{\pinpitch / 2}
+\begin{scope}
+    \clip (\xa mm, \ya mm) rectangle (\xb mm, \yb mm);
+    \draw[line width=0.5mm] (\xcp mm, \yb mm) circle(\dia mm);
+\end{scope}
+
+% \FPeval\namey{\ya - \pinpitch / 4}
+% \FPeval\descy{\ya - \pinpitch * 1.25}
+\FPeval\namey{\yb + \pinpitch * 3}
+\FPeval\descy{\yb + \pinpitch * 2}
+\node[anchor=north,align=center] at (\xcp mm, \namey mm) {#2};
+\node[anchor=north,align=center] at (\xcp mm, \descy mm) {#3};
+
+
+
+\FPeval\pxa{\xpos}
+\FPeval\pxb{\pxa + \pinpitch}
+\FPeval\pinonemarkerx{\pxa + \pinpitch * 2}
+\FPeval\pinonemarkery{\ypos + \pinpitch * \halfpins}
+\FPeval\dotsize{\pinpitch / 4}
+\draw[black,fill=black] (\pinonemarkerx mm,\pinonemarkery mm) circle (\dotsize mm);
+
+\foreach \ct in {1,...,\halfpins}
+{%
+\FPeval\pya{\ypos + \ct * \pinpitch}
+\FPeval\pyb{\pya}
+\draw[line width=0.5mm] (\pxa mm, \pya mm) -- (\pxb mm, \pyb mm);
+
+\FPeval\pnx{\pxb}
+\FPeval\pny{\pyb}
+\FPeval\pn{round(\halfpins + 1 - \ct,0)}
+\node[anchor=west,align=left] at (\pnx mm,\pny mm) {\pn};
+
+\FPeval\plx{\pxa}
+\FPeval\ply{\pyb}
+\node[anchor=east] at (\plx mm,\ply mm) {\getpinnames{\pn}};
+}
+
+\FPeval\pxa{\boxx + \width}
+\FPeval\pxb{\pxa + \pinpitch}
+\foreach \ct in {1,...,\halfpins}
+{%
+\FPeval\pya{\ypos + \ct * \pinpitch}
+\FPeval\pyb{\pya}
+\draw[line width=0.5mm] (\pxa mm, \pya mm) -- (\pxb mm, \pyb mm);
+
+\FPeval\pnx{\pxa}
+\FPeval\pny{\pyb}
+\FPeval\pn{round(\halfpins + \ct,0)}
+\node[anchor=east,align=right] at (\pnx mm,\pny mm) {\pn};
+
+\FPeval\plx{\pxb}
+\FPeval\ply{\pyb}
+\node[anchor=west] at (\plx mm,\ply mm) {\getpinnames{\pn}};
+}
+\end{tikzpicture}
+
+}
+
+% \newcommand*\inv[1]{\overbracket[0.5mm][-1mm]{#1}}
+% \newcommand*\inv[1]{\bar{#1}}
+\newcommand\inv[1]{\accentset{\rule{0.8em}{1pt}}{#1}}
+% \newcommand\inv[1]{\neg{#1}}
+
+% \ic {8}
+% \ic {10}
+% \ic {12}
+% \ic {14}
+% \setpinnames
+% 15=RESET, 14=CLOCK, 13=CLOCK INHIBIT, 12=CARRY OUT, 11=9, 10=4, 9=8, $V_{dd}$}
+\ic {16} {4017} {Decade Counter} {1=5, 2=1, 3=0, 4=2, 5=6, 6=7, 7=3, 8=$V_{SS}$, 16=$V_{DD}$, 15=RESET, 14=CLOCK, 13=CLOCK INHIBIT, 12=CARRY OUT, 11=9, 10=4, 9=8}
+% \ic {16} {4049} {Hex Inverter} {1=$V_{CC}$, 2=A, 3=$\inv A$, 4=B, 5=$\inv B$, 6=C, 7=$\inv C$, 8=$V_{SS}$, 9=D, 10=$\inv D$, 11=E, 12=$\inv E$, 13=NC, 14=F, 15=$\inv F$, 16=NC}
+% \ic {14} {4013} {Dual D-Type Flip-Flop} {1=$Q1$, 2=$\inv{Q1}$, 3=CLOCK1, 4=RESET1, 5=D1, 6=SET1, 7=$V_{SS}$, 8=SET2, 9=D2, 10=RESET2, 11=CLOCK2, 12=$\inv{Q2}$, 13=Q2, 14=$V_{DD}$, 15=$\inv F$, 16=NC}
+% \ic {18}
+% \ic {20}
+% \ic {22}
+% \ic {24}
+% \ic {26}
+% \ic {28}
+
+\end{document}
