@@ -8,6 +8,7 @@
 \documentclass[6pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{tikz}
+\usetikzlibrary{backgrounds}
 \usepackage{fp}
 \usepackage{forloop}
 % \usepackage{fontspec}
@@ -17,6 +18,8 @@
 \usepackage {accents}
 \usepackage{mathspec}
 \usepackage {bm}
+
+\usepackage[a4paper, total={180mm, 277mm}]{geometry}
 
 \setmainfont[
 Path = /home/tarn/repo/code/py/pinouts/,
@@ -34,7 +37,8 @@ BoldItalicFont = FuturaPTBold,
 Extension = .otf,
 Uppercase=Regular,
 Lowercase=Regular,
-Arabic=Regular
+Arabic=Regular,
+SizeFeatures={Size=7}
 ]{FuturaPTBold}
 
 \begin{document}
@@ -54,7 +58,6 @@ Arabic=Regular
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newcommand{\ic}[4]{
-
 % ??
 % \wlog {#4}
 % \newcounter{ct}
@@ -63,11 +66,9 @@ Arabic=Regular
 %   \setpinnames{\thect=\x}
 % \wlog{\thect}
 % }
-
 \setpinnames{#4}
-
+% \begin{tikzpicture}[framed,line cap=round]
 \begin{tikzpicture}[line cap=round]
-
 \FPeval\aspect{1.5}
 \FPeval\npins{#1}
 \FPeval\halfpins{#1 / 2}
@@ -97,6 +98,9 @@ Arabic=Regular
 \draw[line width=0.5mm] (\xa mm,\ya mm) -- (\xa mm, \yb mm);
 \draw[line width=0.5mm] (\xb mm,\ya mm) -- (\xb mm, \yb mm);
 
+\useasboundingbox (\xa mm, \ya mm) rectangle (\xb mm, \yb mm);
+% \draw[use as bounding box] (\xa mm, \ya mm) rectangle (\xb mm, \yb mm);
+
 % Now make the dimple.
 \FPeval\xcp{\xa + \width / 2}
 \FPeval\xlp{\xcp - \pinpitch / 2}
@@ -109,15 +113,15 @@ Arabic=Regular
     \draw[line width=0.5mm] (\xcp mm, \yb mm) circle(\dia mm);
 \end{scope}
 
-% \FPeval\namey{\ya - \pinpitch / 4}
-% \FPeval\descy{\ya - \pinpitch * 1.25}
-\FPeval\namey{\yb + \pinpitch * 3}
-\FPeval\descy{\yb + \pinpitch * 2}
+% Add name and caption
+\FPeval\namey{\ya - \pinpitch / 4}
+\FPeval\descy{\ya - \pinpitch * 1.25}
+% \FPeval\namey{\yb + \pinpitch * 3}
+% \FPeval\descy{\yb + \pinpitch * 2}
 \node[anchor=north,align=center] at (\xcp mm, \namey mm) {#2};
 \node[anchor=north,align=center] at (\xcp mm, \descy mm) {#3};
 
-
-
+% Pin 1 marker
 \FPeval\pxa{\xpos}
 \FPeval\pxb{\pxa + \pinpitch}
 \FPeval\pinonemarkerx{\pxa + \pinpitch * 2}
@@ -125,22 +129,26 @@ Arabic=Regular
 \FPeval\dotsize{\pinpitch / 4}
 \draw[black,fill=black] (\pinonemarkerx mm,\pinonemarkery mm) circle (\dotsize mm);
 
+% Left side pins
 \foreach \ct in {1,...,\halfpins}
 {%
 \FPeval\pya{\ypos + \ct * \pinpitch}
 \FPeval\pyb{\pya}
 \draw[line width=0.5mm] (\pxa mm, \pya mm) -- (\pxb mm, \pyb mm);
 
+% Pin number
 \FPeval\pnx{\pxb}
 \FPeval\pny{\pyb}
 \FPeval\pn{round(\halfpins + 1 - \ct,0)}
 \node[anchor=west,align=left] at (\pnx mm,\pny mm) {\pn};
 
+% Pin label
 \FPeval\plx{\pxa}
 \FPeval\ply{\pyb}
 \node[anchor=east] at (\plx mm,\ply mm) {\getpinnames{\pn}};
 }
 
+% Right side pins
 \FPeval\pxa{\boxx + \width}
 \FPeval\pxb{\pxa + \pinpitch}
 \foreach \ct in {1,...,\halfpins}
@@ -149,38 +157,109 @@ Arabic=Regular
 \FPeval\pyb{\pya}
 \draw[line width=0.5mm] (\pxa mm, \pya mm) -- (\pxb mm, \pyb mm);
 
+% Pin number
 \FPeval\pnx{\pxa}
 \FPeval\pny{\pyb}
 \FPeval\pn{round(\halfpins + \ct,0)}
 \node[anchor=east,align=right] at (\pnx mm,\pny mm) {\pn};
 
+% Pin label
 \FPeval\plx{\pxb}
 \FPeval\ply{\pyb}
 \node[anchor=west] at (\plx mm,\ply mm) {\getpinnames{\pn}};
 }
-\end{tikzpicture}
-
-}
+\end{tikzpicture}}
 
 % \newcommand*\inv[1]{\overbracket[0.5mm][-1mm]{#1}}
 % \newcommand*\inv[1]{\bar{#1}}
-\newcommand\inv[1]{\accentset{\rule{0.8em}{1pt}}{#1}}
+\newcommand*\inv[1]{\overline{#1}}
+% \newcommand\inv[1]{\accentset{\rule{0.8em}{1pt}}{#1}}
 % \newcommand\inv[1]{\neg{#1}}
 
-% \ic {8}
-% \ic {10}
-% \ic {12}
-% \ic {14}
-% \setpinnames
-% 15=RESET, 14=CLOCK, 13=CLOCK INHIBIT, 12=CARRY OUT, 11=9, 10=4, 9=8, $V_{dd}$}
-\ic {16} {4017} {Decade Counter} {1=5, 2=1, 3=0, 4=2, 5=6, 6=7, 7=3, 8=$V_{SS}$, 16=$V_{DD}$, 15=RESET, 14=CLOCK, 13=CLOCK INHIBIT, 12=CARRY OUT, 11=9, 10=4, 9=8}
-% \ic {16} {4049} {Hex Inverter} {1=$V_{CC}$, 2=A, 3=$\inv A$, 4=B, 5=$\inv B$, 6=C, 7=$\inv C$, 8=$V_{SS}$, 9=D, 10=$\inv D$, 11=E, 12=$\inv E$, 13=NC, 14=F, 15=$\inv F$, 16=NC}
-% \ic {14} {4013} {Dual D-Type Flip-Flop} {1=$Q1$, 2=$\inv{Q1}$, 3=CLOCK1, 4=RESET1, 5=D1, 6=SET1, 7=$V_{SS}$, 8=SET2, 9=D2, 10=RESET2, 11=CLOCK2, 12=$\inv{Q2}$, 13=Q2, 14=$V_{DD}$, 15=$\inv F$, 16=NC}
-% \ic {18}
-% \ic {20}
-% \ic {22}
-% \ic {24}
-% \ic {26}
-% \ic {28}
+\newcommand\VDD{$V_{DD}$}
+\newcommand\VSS{$V_{SS}$}
+
+\begin{center}
+\bgroup
+\setlength\tabcolsep{20mm}
+% \setlength\tabrowsep{25mm}
+\def\arraystretch{10}%
+\begin{tabular}{ccc}
+
+\ic {14} {4011} {Quad NAND}
+  {1=A, 2=B, 3=$\inv{AB}$, 4=$\inv{CD}$, 5=C, 6=D, 7=\VSS, 8=E, 9=F, 10=$\inv{EF}$, 11=$\inv{GH}$, 12=G, 13=H, 14=\VDD}
+&
+\ic {14} {4013} {Dual D-Type Flip-Flop}
+  {1=$Q1$, 2=$\inv{Q1}$, 3=CLOCK1, 4=RESET1, 5=D1, 6=SET1, 7=\VSS, 8=SET2, 9=D2, 10=RESET2, 11=CLOCK2, 12=$\inv{Q2}$, 13=Q2, 14=\VDD, 15=$\inv F$, 16=NC}
+&
+\ic {16} {4017} {Decade Counter}
+  {1=5, 2=1, 3=0, 4=2, 5=6, 6=7, 7=3, 8=\VSS, 16=\VDD, 15=RESET, 14=CLOCK, 13=CLOCK INHIBIT, 12=CARRY OUT, 11=9, 10=4, 9=8}
+\\
+\ic {16} {4042} {Quad Clocked D Latch}
+  {1=Q4, 2=Q1, 3=$\inv{Q1}$, 4=D1, 5=CLOCK, 6=POLARITY, 7=D2, 8=\VSS, 9=$\inv{Q2}$, 10=Q2, 11=Q3, 12=$\inv{Q3}$, 13=D3, 14=D4, 15=$\inv{Q4}$, 16=\VDD}
+&
+\ic {16} {4043} {Quad 3-State R/S Latch}
+  {1=Q4, 2=Q1, 3=R1, 4=S1, 5=ENABLE, 6=S2, 7=R2, 8=\VSS, 9=Q2, 10=Q3, 11=R3, 12=S3, 13=NC, 14=S4, 15=R4, 16=\VDD}
+&
+\ic {16} {4049} {Hex Inverter}
+  {1=\VDD, 3=A, 2=$\inv A$, 5=B, 4=$\inv B$, 7=C, 6=$\inv C$, 8=\VSS, 9=D, 10=$\inv D$, 11=E, 12=$\inv E$, 13=NC, 14=F, 15=$\inv F$, 16=NC}
+\\
+\ic {16} {4060} {Oscillator/Counter}
+  {1=Q12, 2=Q13, 3=Q14, 4=Q6, 5=Q5, 6=Q7, 7=Q4, 8=\VSS, 9=${\bf\phi}_O$, 10=$\inv{{\bf\phi}_O}$, 11=${\bf\phi}_I$, 12=RESET, 13=Q9, 14=Q8, 15=Q10, 16=\VDD}
+&
+\ic {14} {4081} {Quad AND}
+  {1=A, 2=B, 3=$AB$, 4=$CD$, 5=C, 6=D, 7=\VSS, 8=E, 9=F, 10=$EF$, 11=$GH$, 12=G, 13=H, 14=\VDD}
+&
+\ic {16} {4094} {SIPO Bus Register}
+  {1=STROBE, 2=DATA, 3=CLOCK, 4=Q1, 5=Q2, 6=Q3, 7=Q4, 8=\VSS, 9=$Q_S$, 10=$\inv{Q_S}$, 11=Q8, 12=Q7, 13=Q6, 14=Q5, 15=OUTPUT ENABLE, 16=\VDD}
+\\
+\ic {14} {40106} {Hex Schmitt Trigger Inverter} {1=A, 2=$\inv A$, 3=B, 4=$\inv B$, 5=C, 6=$\inv C$, 7=\VSS, 8=$\inv D$, 9=D, 10=$\inv E$, 11=E, 12=$\inv F$, 13=F, 14=\VDD}
+&
+\ic {16} {670} {4x4 Register File}
+  {1=D1, 2=D2, 3=D3, 4=RA1, 5=RA0, 6=Q3, 7=Q2, 8=\VSS, 9=Q1, 10=Q0, 11=$\inv{RE}$, 12=$\inv{WE}$, 13=WA1, 14=WA0, 15=D0, 16=\VDD}
+&
+\ic {16} {283} {4-bit Adder}
+{1=S1, 2=B1, 3=A1, 4=S0, 5=A0, 6=B0, 7=$C_{IN}$, 8=\VSS, 9=$C_{OUT}$, 10=S3, 11=B3, 12=A3, 13=S2, 14=A2, 15=B2, 16=\VDD}
+\\
+\ic {28} {PIC18F27K42} {}
+{1=Vpp/$\inv{MCLR}$/RE3, 2=RA0, 3=RA1, 4=RA2, 5=RA3, 6=RA4, 7=RA5, 8=\VSS, 9=RA7, 10=RA6, 11=RC0, 12=RC1, 13=RC2, 14=RC3, 15=RC4, 16=RC5, 17=RC6, 18=RC7, 19=\VSS, 20=\VDD, 21=RB0, 22=RB1, 23=RB2, 24=RB3, 25=RB4, 26=RB5, 27=RB6/ICSPCLK, 28=RB7/ICSPDAT}
+&
+\ic {28} {DS1230Y} {Real-Time Clock}
+{1=A14, 2=A12, 3=A7, 4=A6, 5=A5, 6=A4, 7=A3, 8=A2, 9=A1, 10=A0, 11=DQ0, 12=DQ1, 13=DQ2, 14=\VSS, 15=DQ3, 16=DQ4, 17=DQ5, 18=DQ6, 19=DQ7, 20=$\inv{CHIP\ ENABLE}$, 21=A10, 22=$\inv{OUTPUT\ ENABLE}$, 23=A11, 24=A9, 25=A8, 26=A13, 27=$\inv{WRITE\ ENABLE}$, 28=\VDD}
+&
+\ic {32} {SST39SF010A} {1 Mbit Flash Memory}
+{1=NC, 2=A16, 3=A15, 4=A12, 5=A7, 6=A6, 7=A5, 8=A4, 9=A3, 10=A2, 11=A1, 12=A0, 13=DQ0, 14=DQ1, 15=DQ2, 16=\VSS, 17=DQ3, 18=DQ4, 19=DQ5, 20=DQ6, 21=DQ7, 22=$\inv{CHIP\ ENABLE}$, 23=A10, 24=$\inv{OUTPUT\ ENABLE}$, 25=A11, 26=A9, 27=A8, 28=A13, 29=A14, 30=NC, 31=$\inv{WRITE\ ENABLE}$, 32=\VDD}
+\\
+\end{tabular}
+
+\begin{tabular}{ccc}
+\ic {16} {4015} {Dual 4-bit Shift Register}
+{1=B CLOCK, 2=BQ4, 3=AQ3, 4=AQ2, 5=AQ1, 6=A RESET, 7=A DATA, 8=\VSS, 9=A CLOCK, 10=AQ4, 11=BQ3, 12=BQ2, 13=BQ1, 14=B RESET, 15=B DATA, 16=\VDD}
+&
+\ic {16} {4028} {BCD to 1-of-10 Decoder}
+{1=4, 2=2, 3=0, 4=7, 5=9, 6=5, 7=6, 8=\VSS, 9=8, 10=A, 11=D, 12=C, 13=B, 14=1, 15=3, 16=\VDD}
+&
+\ic {16} {4031} {64-bit shift register}
+{1=DATA IN 2, 2=CLOCK IN, 3=NC, 4=NC, 5=$Q'$, 6=Q, 7=$\inv{Q}$, 8=\VSS, 9=DELAYED CLOCK OUT, 10=MODE CONTROL, 11=NC, 12=NC, 13=NC, 14=NC, 15=DATA IN 1, 16=\VDD}
+\\
+\ic {16} {4035} {4-bit Parallel I/O Shift Register}
+{1=Q1, 2=TRUE/COMP, 3=$\inv{K}$, 4=J, 5=RESET, 6=CLOCK, 7=P/S, 8=\VSS, 9=PI-1, 10=PI-2, 11=PI-3, 12=PI-4, 13=Q4, 14=Q3, 15=Q2, 16=\VDD}
+&
+\ic {16} {4046} {PLL}
+{1=PHASE PULSES, 2=PHASE COMP I, 3=COMPARATOR IN, 4=VCO OUT, 5=INHIBIT, 6=CI1, 7=CI2, 8=\VSS, 9=VCO IN, 10=DEMODULATOR OUT, 11=R1 TO \VSS, 12=R2 TO \VSS, 13=PHASE COMP II OUT, 14=SIGNAL IN, 15=ZENER, 16=\VDD}
+&
+\ic {16} {4050} {Hex Buffer}
+  {1=\VDD, 3=I1, 2=O1, 5=I2, 4=O2, 7=I3, 6=O3, 8=\VSS, 9=I4, 10=O4, 11=I5, 12=O5, 13=NC, 14=I6, 15=O6, 16=NC}
+\\
+\ic {16} {4536} {Programmable Timer}
+{1=SET, 2=RESET, 3=IN 1, 4=OUT 1, 5=OUT 2, 6=8-BYPASS, 7=CLOCK INHIBIT, 8=\VSS, 9=A, 10=B, 11=C, 12=D, 13=DECODE OUT, 14=OSC INHIBIT, 15=MONO IN, 16=\VDD}
+\\
+\end{tabular}
+\egroup
+\end{center}
 
 \end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

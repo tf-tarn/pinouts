@@ -1,0 +1,5 @@
+\ProvidesFile{OT1futura.fd}
+[YYYY/mm/dd foobar]
+\DeclareFontFamily{T1}{futura}{}
+\DeclareFontShape{T1}{futura}{m}{n} {futura} {}
+\endinput
